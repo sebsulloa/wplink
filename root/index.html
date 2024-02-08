@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home Page</title>
+</head>
+<body>
+    <h1>Welcome to the Home Page</h1>
+    
+    <label for="linkInput">Enter URL:</label>
+    <input type="text" id="linkInput" name="linkInput">
+    
+    <label for="countryCode">Select Country Code:</label>
+    <select id="countryCode" name="countryCode">
+        <option value="+57">Colombia (+57)</option>
+        <option value="+1">United States (+1)</option>
+        <option value="+44">United Kingdom (+44)</option>
+        <!-- Add more country codes here -->
+    </select>
+    
+    <button onclick="createLink()">Create Link</button>
+    
+    <script>
+        function createLink() {
+            var url = document.getElementById("linkInput").value;
+            var countryCode = document.getElementById("countryCode").value;
+            var link = "tel:" + countryCode + url;
+            window.location.href = link;
+        }
+    </script>
+</body>
+</html>
