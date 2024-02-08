@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WhatsApp Link Generator</title>
     <style>
+        @font-face {
+            font-family: NotoColorEmojiLimited;
+            unicode-range: U+1F1E6-1F1FF;
+            src: url(https://raw.githack.com/googlefonts/noto-emoji/main/fonts/NotoColorEmoji.ttf);
+        }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -36,6 +41,11 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
+        select, option{
+            font-family: 'NotoColorEmojiLimited', -apple-system, BlinkMacSystemFont, 
+            'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 
+            'Segoe UI Emoji', 'Segoe UI Symbol';
+        }
         button {
             width: 100%;
             padding: 10px;
@@ -53,13 +63,14 @@
 <body>
     <div class="container">
         <h1>WhatsApp Link Generator</h1>
-        <label for="linkInput">Enter Number:</label>
-        <input type="text" id="linkInput" name="linkInput" placeholder="Enter phone number...">
         
         <label for="countryCode">Select Country:</label>
         <select id="countryCode" name="countryCode">
-            <!-- Options will be dynamically added here -->
+
         </select>
+
+        <label for="linkInput">Enter Number:</label>
+        <input type="text" id="linkInput" name="linkInput" placeholder="Enter phone number...">
         
         <button onclick="createLink()">Create Link</button>
     </div>
@@ -68,20 +79,42 @@
         async function fetchCountries() {
             const response = await fetch('https://restcountries.com/v3.1/all');
             const data = await response.json();
+
             return data;
         }
-
+        
         async function populateCountries() {
             const countries = await fetchCountries();
             const select = document.getElementById("countryCode");
             
-            countries.forEach(country => {
-                const option = document.createElement("option");
-                option.value = country.callingCodes[0];
-                option.textContent = `${country.emoji} ${country.name.common} (${country.callingCodes[0]})`;
-                select.appendChild(option);
+            // Sort countries alphabetically by name
+            countries.sort((a, b) => {
+                if (a.name.common < b.name.common) return -1;
+                if (a.name.common > b.name.common) return 1;
+                return 0;
             });
+            
+            countries.forEach(country => {
+                if (country.idd && country.idd.root) {
+                    const countryCode = country.idd.suffixes.length > 1 ? country.idd.root : `${country.idd.root}${country.idd.suffixes[0]}`;
+                    const option = document.createElement("option");
+                    option.value = countryCode;
+                    option.textContent = `${getFlagEmoji(country.cca2)} ${country.name.common} (${countryCode})`;
+                    select.appendChild(option);
+                }
+            });
+
+            // Set default selected option to Colombia
+            const defaultCountryCode = "+57";
+            select.value = defaultCountryCode;
         }
+
+        // Function to get flag emoji based on country code
+        function getFlagEmoji(countryCode) {
+            const codePoints = countryCode.toUpperCase().split("").map((char) => 127397 + char.charCodeAt(0));
+            return String.fromCodePoint(...codePoints);
+        }
+
 
         function createLink() {
             var phoneNumber = document.getElementById("linkInput").value;
